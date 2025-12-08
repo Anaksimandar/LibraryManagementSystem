@@ -1,10 +1,11 @@
 ﻿using LibraryManagementSystem.Models;
+using LibraryManagementSystem.Repository;
 
 namespace LibraryManagementSystem
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             using var context = new LibraryManagementSystemContext();
 
@@ -45,7 +46,19 @@ namespace LibraryManagementSystem
                 Console.WriteLine($"Book: {b.Title}, Publication Year: {b.PublicationYear}, AuthorId: {b.AuthorId}");
             }
 
+            var efContext = new EFLibraryRepository(context);
 
+            Book newBook = new Book { Id = 1, Title = "Nineteen Eighty-Four", PublicationYear = 1949, AuthorId = 2 };
+
+            await efContext.UpdateBookAsync(newBook);
+
+            var booksGetIEnumerable = await efContext.GetBooksAsync();
+
+            foreach (var b in booksGetIEnumerable)
+            {
+                Console.WriteLine($"Book: {b.Title}, Publication Year: {b.PublicationYear}, AuthorId: {b.AuthorId}");
+
+            }
         }
     }
 }
