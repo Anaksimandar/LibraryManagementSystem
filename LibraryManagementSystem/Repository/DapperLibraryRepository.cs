@@ -53,42 +53,49 @@ namespace LibraryManagementSystem.Repository
         public async Task<IEnumerable<Author>> GetAuthorsAsync()
         {
             const string sql = @"
-                SELECT a.Id, a.Name,
-                    b.Id, b.Title, b.PublishedYear, b.AuthorId
-                FROM Authors a
-                LEFT JOIN Books b ON a.Id = b.AuthorId";
+            SELECT a.Id, a.Name, a.YearOfBirth,
+                   b.Id, b.Title, b.PublicationYear, b.AuthorId
+            FROM Authors a
+            LEFT JOIN Books b ON b.AuthorId = a.Id;";
 
             using var conn = CreateConnection();
             conn.Open();
 
-            var authorDict = new Dictionary<int, Author>();
+            // Use a dictionary to collapse duplicate authors produced by the JOIN;
+            // each row may repeat the same author for different books. We keep one
+            // Author instance per Id and accumulate its books.
+            var lookup = new Dictionary<int, Author>();
 
-            var authors = await conn.QueryAsync<Author, Book, Author>(
+            var result = await conn.QueryAsync<Author, Book, Author>(
                 sql,
                 (author, book) =>
-                {
-                    if (!authorDict.TryGetValue(author.Id, out var currentAuthor))
+                {   
+                    if (lookup.TryGetValue(author.Id, out var existing))
                     {
-                        currentAuthor = author;
-                        currentAuthor.Books = new List<Book>();
-                        authorDict.Add(currentAuthor.Id, currentAuthor);
+                        author = existing;
+                    }
+                    else
+                    {
+                        author.Books = new List<Book>();
+                        lookup.Add(author.Id, author);
                     }
 
-                    if (book != null)
-                        currentAuthor.Books.Add(book);
+                    if (book != null && book.Id > 0)
+                    {
+                        author.Books.Add(book);
+                    }
 
-                    return currentAuthor;
+                    return author;
                 },
-                splitOn: "Id"
-            );
+                splitOn: "Id");
 
-            return authorDict.Values;
+            return lookup.Values;
         }
 
         public async Task<IEnumerable<Book>> GetBooksAsync()
         {
             const string sql = @"
-            SELECT b.Id, b.Title, b.AuthorId, b.PublishedYear,
+            SELECT b.Id, b.Title, b.AuthorId, b.PublicationYear,
                    a.Id, a.Name
             FROM Books b
             INNER JOIN Authors a ON b.AuthorId = a.Id;";
