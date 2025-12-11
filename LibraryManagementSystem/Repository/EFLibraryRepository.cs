@@ -1,4 +1,5 @@
-﻿using LibraryManagementSystem.Models;
+﻿using LibraryManagementSystem.Dto.Update;
+using LibraryManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementSystem.Repository
@@ -62,9 +63,9 @@ namespace LibraryManagementSystem.Repository
             return books;
         }
 
-        public async Task UpdateAuthorAsync(Author updatedAuthor)
+        public async Task UpdateAuthorAsync(int authorId, NewAuthorDto updatedAuthor)
         {
-            Author? author = await _context.Authors.FindAsync(updatedAuthor.Id);
+            Author? author = await _context.Authors.FindAsync(authorId);
 
             if (author == null) return;
 
@@ -74,9 +75,9 @@ namespace LibraryManagementSystem.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateBookAsync(Book updatedBook)
+        public async Task UpdateBookAsync(int bookId, NewBookDto updatedBook)
         {
-            Book? book = await _context.Books.FindAsync(updatedBook.Id);
+            Book? book = await _context.Books.FindAsync(bookId);
 
             if (book == null) return;
 

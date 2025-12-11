@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using LibraryManagementSystem.Dto.Update;
 using LibraryManagementSystem.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
@@ -32,22 +33,22 @@ namespace LibraryManagementSystem.Repository
             await connection.ExecuteAsync(sql, new { Title = newBook.Title, PublicationYear = newBook.PublicationYear, AuthorId = newBook.AuthorId });
         }
 
-        public Task DeleteAuthorAsync(int authorId)
+        public async Task DeleteAuthorAsync(int authorId)
         {
-            var sql = @"DELETE FROM Authors WHERE Id = @authorId;";
+            var sql = @"DELETE FROM Authors WHERE Id = @Id;";
             using var connection = CreateConnection();
             connection.Open();
 
-            return connection.ExecuteAsync(sql, new { Id = authorId });
+            await connection.ExecuteAsync(sql, new { Id = authorId });
         }
 
-        public Task DeleteBookAsync(int bookId)
+        public async Task DeleteBookAsync(int bookId)
         {
-            var sql = @"DELETE FROM Books WHERE Id = @bookId;";
+            var sql = @"DELETE FROM Books WHERE Id = @Id;";
             using var connection = CreateConnection();
             connection.Open();
 
-            return connection.ExecuteAsync(sql, new { Id = bookId });
+            await connection.ExecuteAsync(sql, new { Id = bookId });
         }
 
         public async Task<IEnumerable<Author>> GetAuthorsAsync()
@@ -113,30 +114,26 @@ namespace LibraryManagementSystem.Repository
             return result;
         }
 
-        public Task UpdateAuthorAsync(Author updatedAuthor)
+        public async Task UpdateAuthorAsync(int authorId, NewAuthorDto newAuthor)
         {
             var sql = @"UPDATE Authors SET Name = @Name, YearOfBirth = @YearOfBirth WHERE Id = @Id;";
             using var connection = CreateConnection();
             connection.Open();
 
-            var result = connection.ExecuteAsync(sql,
-                new { Name = updatedAuthor.Name, YearOfBirth = updatedAuthor.YearOfBirth, Id = updatedAuthor.Id }
+            await connection.ExecuteAsync(sql,
+                new { Name = newAuthor.Name, YearOfBirth = newAuthor.YearOfBirth, Id = authorId }
             );
-
-            return result;
         }
 
-        public Task UpdateBookAsync(Book updatedBook)
+        public async Task UpdateBookAsync(int bookId, NewBookDto newBook)
         {
             var sql = @"UPDATE Books SET Title = @Title, PublicationYear = @PublicationYear, AuthorId = @AuthorId WHERE Id = @Id;";
             using var connection = CreateConnection();
             connection.Open();
 
-            var result = connection.ExecuteAsync(sql,
-                new { Title = updatedBook.Title, PublicationYear = updatedBook.PublicationYear, AuthorId = updatedBook.AuthorId }
+            await connection.ExecuteAsync(sql,
+                new { Title = newBook.Title, PublicationYear = newBook.PublicationYear, AuthorId = newBook.AuthorId, Id = bookId }
             );
-
-            return result;
         }
     }
 }

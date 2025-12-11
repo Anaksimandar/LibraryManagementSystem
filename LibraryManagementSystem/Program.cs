@@ -1,4 +1,5 @@
-﻿using LibraryManagementSystem.Models;
+﻿using LibraryManagementSystem.Dto.Update;
+using LibraryManagementSystem.Models;
 using LibraryManagementSystem.Repository;
 
 namespace LibraryManagementSystem
@@ -9,7 +10,7 @@ namespace LibraryManagementSystem
         {
             foreach (var author in authors)
             {
-                Console.WriteLine($"Author: {author.Name}, Year of Birth: {author.YearOfBirth}");
+                Console.WriteLine($"Author:{author.Id} {author.Name}, Year of Birth: {author.YearOfBirth}");
                 foreach (var book in author.Books)
                 {
                     Console.WriteLine($"\tBookid: {book.Id} Book: {book.Title}, Publication Year: {book.PublicationYear}");
@@ -68,10 +69,58 @@ namespace LibraryManagementSystem
                 Console.WriteLine($"Book: {book.Title}, Publication Year: {book.PublicationYear}, AuthorId: {book.AuthorId}");
             }
 
+            Console.WriteLine("----- Authors and their Books -----");
             PrintAuthors(authors);
 
-            Author newA
+            Author? authorId1 = authors.FirstOrDefault(a => a.Id == 2);
+            if (authorId1 != null)
+            {
+                Console.WriteLine($"Author found: {authorId1.Name}, Year of Birth: {authorId1.YearOfBirth}");
+            }
+            else
+            {
+                Console.WriteLine("Author not found.");
+                return;
+            }
+            // Update an author
+            var updatedAuthor = new NewAuthorDto
+            {
+                Name = "Dzordz Orvel",
+                YearOfBirth = 1959
+            };
 
+            await dapperRepo.UpdateAuthorAsync(authorId1.Id, updatedAuthor);
+
+            var updatedAuthors = await dapperRepo.GetAuthorsAsync();
+
+            // Update an book
+
+            NewBookDto newBook = new NewBookDto { Title = "Hobit u Cacku", PublicationYear = 1949, AuthorId = 2 };
+
+            Book? bookId2 = books.FirstOrDefault(a => a.Id == 2);
+            if (bookId2 != null)
+            {
+                Console.WriteLine("Book found");
+            }
+            else
+            {
+                Console.WriteLine("Author not found.");
+                return;
+            }
+
+            await dapperRepo.UpdateBookAsync(bookId2.Id, newBook);
+            updatedAuthors = await dapperRepo.GetAuthorsAsync();
+            Console.WriteLine("----- Author (After Dzordz Orvel) and Book (Hobbit ...) update -----");
+            PrintAuthors(updatedAuthors);
+
+            // Delete an author
+
+            await dapperRepo.DeleteAuthorAsync(3); // Dzordz Orvel should be deleted
+            await dapperRepo.DeleteBookAsync(5); // Hobit u Cacku should be deleted
+
+            updatedAuthors = await dapperRepo.GetAuthorsAsync();
+            Console.WriteLine("----- Authors after deleting Tolkin and 1984.");
+            PrintAuthors(updatedAuthors);
         }
     }
 }

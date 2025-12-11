@@ -1,4 +1,5 @@
-﻿using LibraryManagementSystem.Models;
+﻿using LibraryManagementSystem.Dto.Update;
+using LibraryManagementSystem.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,10 +11,10 @@ namespace LibraryManagementSystem.Repository
         Task<IEnumerable<Author>> GetAuthorsAsync();
         Task AddAuthorAsync(Author newAuthor);
         Task DeleteAuthorAsync(int authorId);
-        Task UpdateAuthorAsync(Author updatedAuthor);
+        Task UpdateAuthorAsync(int authorId ,NewAuthorDto updatedAuthor);
         Task<IEnumerable<Book>> GetBooksAsync();
         Task AddBookAsync(Book newBook);
         Task DeleteBookAsync(int bookId);
-        Task UpdateBookAsync(Book updatedBook);
+        Task UpdateBookAsync(int bookId, NewBookDto updatedBook);
     }
 }
